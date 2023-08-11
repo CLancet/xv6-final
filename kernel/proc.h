@@ -1,5 +1,6 @@
 // Saved registers for kernel context switches.
-struct context {
+struct context
+{
   uint64 ra;
   uint64 sp;
 
@@ -19,11 +20,12 @@ struct context {
 };
 
 // Per-CPU state.
-struct cpu {
-  struct proc *proc;          // The process running on this cpu, or null.
-  struct context context;     // swtch() here to enter scheduler().
-  int noff;                   // Depth of push_off() nesting.
-  int intena;                 // Were interrupts enabled before push_off()?
+struct cpu
+{
+  struct proc *proc;      // The process running on this cpu, or null.
+  struct context context; // swtch() here to enter scheduler().
+  int noff;               // Depth of push_off() nesting.
+  int intena;             // Were interrupts enabled before push_off()?
 };
 
 extern struct cpu cpus[NCPU];
@@ -41,7 +43,8 @@ extern struct cpu cpus[NCPU];
 // the trapframe includes callee-saved user registers like s0-s11 because the
 // return-to-user path via usertrapret() doesn't return through
 // the entire kernel call stack.
-struct trapframe {
+struct trapframe
+{
   /*   0 */ uint64 kernel_satp;   // kernel page table
   /*   8 */ uint64 kernel_sp;     // top of process's kernel stack
   /*  16 */ uint64 kernel_trap;   // usertrap()
@@ -80,21 +83,30 @@ struct trapframe {
   /* 280 */ uint64 t6;
 };
 
-enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+enum procstate
+{
+  UNUSED,
+  USED,
+  SLEEPING,
+  RUNNABLE,
+  RUNNING,
+  ZOMBIE
+};
 
 // Per-process state
-struct proc {
+struct proc
+{
   struct spinlock lock;
 
   // p->lock must be held when using these:
-  enum procstate state;        // Process state
-  void *chan;                  // If non-zero, sleeping on chan
-  int killed;                  // If non-zero, have been killed
-  int xstate;                  // Exit status to be returned to parent's wait
-  int pid;                     // Process ID
+  enum procstate state; // Process state
+  void *chan;           // If non-zero, sleeping on chan
+  int killed;           // If non-zero, have been killed
+  int xstate;           // Exit status to be returned to parent's wait
+  int pid;              // Process ID
 
   // wait_lock must be held when using this:
-  struct proc *parent;         // Parent process
+  struct proc *parent; // Parent process
 
   // these are private to the process, so p->lock need not be held.
   uint64 kstack;               // Virtual address of kernel stack
@@ -105,4 +117,41 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+
+  int ticks;
+  uint64 handler;
+  int ticks_cnt;
+  int handler_exc;
+  uint64 tick_epc;
+  /*  40 */ uint64 tick_ra;
+  /*  48 */ uint64 tick_sp;
+  /*  56 */ uint64 tick_gp;
+  /*  64 */ uint64 tick_tp;
+  /*  72 */ uint64 tick_t0;
+  /*  80 */ uint64 tick_t1;
+  /*  88 */ uint64 tick_t2;
+  /*  96 */ uint64 tick_s0;
+  /* 104 */ uint64 tick_s1;
+  /* 112 */ uint64 tick_a0;
+  /* 120 */ uint64 tick_a1;
+  /* 128 */ uint64 tick_a2;
+  /* 136 */ uint64 tick_a3;
+  /* 144 */ uint64 tick_a4;
+  /* 152 */ uint64 tick_a5;
+  /* 160 */ uint64 tick_a6;
+  /* 168 */ uint64 tick_a7;
+  /* 176 */ uint64 tick_s2;
+  /* 184 */ uint64 tick_s3;
+  /* 192 */ uint64 tick_s4;
+  /* 200 */ uint64 tick_s5;
+  /* 208 */ uint64 tick_s6;
+  /* 216 */ uint64 tick_s7;
+  /* 224 */ uint64 tick_s8;
+  /* 232 */ uint64 tick_s9;
+  /* 240 */ uint64 tick_s10;
+  /* 248 */ uint64 tick_s11;
+  /* 256 */ uint64 tick_t3;
+  /* 264 */ uint64 tick_t4;
+  /* 272 */ uint64 tick_t5;
+  /* 280 */ uint64 tick_t6;
 };
